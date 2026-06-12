@@ -107,6 +107,14 @@ body{font-family:var(--font);background:var(--bg-ter);color:var(--text);display:
 .ps-row.selected .ps-check{background:var(--green);border-color:var(--green);color:#fff}
 .ps-name{flex:1;font-size:15px}
 .ps-wins{font-size:13px;color:var(--text-sec)}
+.ps-delete{
+  width:32px;height:32px;border:none;border-radius:50%;
+  background:var(--danger-bg);color:var(--danger);
+  font-size:15px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-appearance:none;flex-shrink:0;
+}
+.ps-delete:active{opacity:0.75;transform:scale(0.94)}
 
 .add-player-row{
   display:flex;gap:10px;padding:0 16px 16px;
@@ -499,6 +507,7 @@ function renderPlayerSelect(){
       <div class="ps-check">${sel?'✓':''}</div>
       <span class="ps-name">${esc(name)}</span>
       <span class="ps-wins">${d.wins} Siege</span>
+      <button type="button" class="ps-delete" data-action="delete-player" data-player-name="${escAttr(name)}" aria-label="${escAttr(name)} löschen" title="Spieler löschen">🗑</button>
     </div>`;
   }).join('');
 }
@@ -523,6 +532,20 @@ function addNewPlayer(){
   if(selectedPlayers.length<6) selectedPlayers.push(name);
   inp.value='';
   renderHome();
+}
+
+function deletePlayer(name){
+  if(!db.players[name]) return;
+  const stats=db.players[name];
+  const extra=stats.games>0?`
+
+Hinweis: Bisherige Spiele in der Historie bleiben erhalten, aber der Spieler verschwindet aus der Startliste.`:'';
+  if(!confirm(`Spieler "${name}" wirklich löschen?${extra}`)) return;
+  delete db.players[name];
+  selectedPlayers=selectedPlayers.filter(p=>p!==name);
+  save();
+  renderHome();
+  showToast('Spieler gelöscht');
 }
 
 function updateStartBtn(){
@@ -750,7 +773,8 @@ function setupEventListeners(){
       if(action==='add-player') return;
 
       e.preventDefault();
-      if(action==='start-game') startGame();
+      if(action==='delete-player') deletePlayer(actionEl.dataset.playerName);
+      else if(action==='start-game') startGame();
       else if(action==='print') window.print();
       else if(action==='quit') confirmQuit();
       else if(action==='rematch') rematch();
