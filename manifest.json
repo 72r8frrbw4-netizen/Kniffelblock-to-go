@@ -2,7 +2,7 @@
   "name": "Kniffelblock",
   "short_name": "Kniffel",
   "description": "Digitaler Kniffelblock mit Rangliste",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1D9E75",
